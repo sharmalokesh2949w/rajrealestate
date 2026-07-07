@@ -1,0 +1,209 @@
+// CONFIGURATIONS - REPLACE THESE WITH YOUR OWN API ENDPOINTS
+const CONFIG = {
+    // 1. Google Sheets Web App URL (Deploy google-apps-script.js as a Web App in script.google.com and paste URL here)
+    GOOGLE_SHEET_API_URL: "https://script.google.com/macros/s/AKfycbzXXXXXXXXXXXXX/exec",
+    
+    // 2. Cloudinary Unsigned Upload Configuration for Career page resume uploads
+    CLOUDINARY_URL: "https://api.cloudinary.com/v1_1/YOUR_CLOUD_NAME/upload",
+    CLOUDINARY_UPLOAD_PRESET: "YOUR_UNSIGNED_PRESET"
+};
+
+document.addEventListener("DOMContentLoaded", () => {
+    // 1. STICKY NAVBAR SCROLL
+    const navbar = document.querySelector(".navbar-custom");
+    if (navbar) {
+        window.addEventListener("scroll", () => {
+            if (window.scrollY > 50) {
+                navbar.classList.add("scrolled");
+            } else {
+                navbar.classList.remove("scrolled");
+            }
+        });
+    }
+
+    // 2. COUNTER ANIMATION
+    const counters = document.querySelectorAll(".counter-value");
+    if (counters.length > 0) {
+        const runCounters = () => {
+            counters.forEach(counter => {
+                const target = +counter.getAttribute("data-target");
+                let count = 0;
+                const speed = target / 50;
+                const updateCount = () => {
+                    if (count < target) {
+                        count = Math.ceil(count + speed);
+                        counter.innerText = count > target ? target : count;
+                        setTimeout(updateCount, 30);
+                    } else {
+                        counter.innerText = target;
+                    }
+                };
+                updateCount();
+            });
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    runCounters();
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.5 });
+
+        const counterSection = document.querySelector(".counter-section");
+        if (counterSection) {
+            observer.observe(counterSection);
+        }
+    }
+
+    // 3. SMOOTH REVEAL SCROLLING (IntersectionObserver)
+    const revealElements = document.querySelectorAll(".reveal");
+    if (revealElements.length > 0) {
+        const revealObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add("active");
+                    revealObserver.unobserve(entry.target); // Reveal once
+                }
+            });
+        }, {
+            threshold: 0.1,
+            rootMargin: "0px 0px -50px 0px"
+        });
+
+        revealElements.forEach(el => {
+            revealObserver.observe(el);
+        });
+    }
+
+    // 4. IMPROVED POPUP ADVERTISEMENT
+    const popupOverlay = document.getElementById("adPopupOverlay");
+    const popupContent = document.querySelector(".ad-popup-content");
+    if (popupOverlay && popupContent) {
+        const adShown = sessionStorage.getItem("adShown");
+        if (!adShown) {
+            popupOverlay.style.display = "flex";
+
+            // Slideshow setup
+            const slides = document.querySelectorAll(".popup-slide");
+            let activeIndex = 0;
+            if (slides.length > 1) {
+                setInterval(() => {
+                    slides[activeIndex].classList.remove("active");
+                    activeIndex = (activeIndex + 1) % slides.length;
+                    slides[activeIndex].classList.add("active");
+                }, 2500);
+            }
+
+            // Close button 5s delay
+            setTimeout(() => {
+                const closeBtn = document.getElementById("adPopupClose");
+                if (closeBtn) {
+                    closeBtn.style.display = "flex";
+                }
+            }, 5000);
+
+            // One-click redirect on the entire popup (excluding close button)
+            popupContent.addEventListener("click", (e) => {
+                if (e.target.id === "adPopupClose") return;
+                // Redirect to the featured project in advertisement
+                window.location.href = "projects/neelkanth-nagar.html";
+            });
+        }
+
+        const closeBtn = document.getElementById("adPopupClose");
+        if (closeBtn) {
+            closeBtn.addEventListener("click", (e) => {
+                e.stopPropagation(); // Stop click from bubbling to popupContent redirect
+                popupOverlay.style.display = "none";
+                sessionStorage.setItem("adShown", "true");
+            });
+        }
+    }
+
+    // 5. GOOGLE SHEETS AJAX FORM SUBMISSION
+    const forms = document.querySelectorAll(".sheet-form");
+    forms.forEach(form => {
+        form.addEventListener("submit", async (e) => {
+            e.preventDefault();
+            
+            const submitBtn = form.querySelector('button[type="submit"]');
+            const originalBtnText = submitBtn.innerHTML;
+            
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = `<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Saving...`;
+
+            let feedback = form.querySelector(".form-feedback");
+            if (!feedback) {
+                feedback = document.createElement("div");
+                feedback.className = "form-feedback mt-3 alert d-none";
+                form.appendChild(feedback);
+            }
+            feedback.classList.add("d-none");
+
+            try {
+                const formData = new FormData(form);
+                const dataObj = {};
+                formData.forEach((value, key) => {
+                    dataObj[key] = value;
+                });
+
+                if (document.body.getAttribute("data-project-name")) {
+                    dataObj["projectName"] = document.body.getAttribute("data-project-name");
+                }
+                dataObj["sourcePage"] = window.location.pathname.split("/").pop() || "index.html";
+
+                // Handle Resume file uploads in Careers
+                const resumeFileInput = form.querySelector('input[type="file"][name="resumeFile"]');
+                if (resumeFileInput && resumeFileInput.files.length > 0) {
+                    const file = resumeFileInput.files[0];
+                    const cloudinaryData = new FormData();
+                    cloudinaryData.append("file", file);
+                    cloudinaryData.append("upload_preset", CONFIG.CLOUDINARY_UPLOAD_PRESET);
+
+                    feedback.classList.remove("d-none");
+                    feedback.className = "form-feedback mt-3 alert alert-info";
+                    feedback.innerText = "Uploading resume file to Cloudinary...";
+
+                    const uploadRes = await fetch(CONFIG.CLOUDINARY_URL, {
+                        method: "POST",
+                        body: cloudinaryData
+                    });
+
+                    if (!uploadRes.ok) {
+                        throw new Error("Cloudinary file upload failed. Please verify credentials.");
+                    }
+
+                    const uploadJson = await uploadRes.json();
+                    dataObj["resumeUrl"] = uploadJson.secure_url;
+                }
+
+                feedback.classList.remove("d-none");
+                feedback.className = "form-feedback mt-3 alert alert-info";
+                feedback.innerText = "Recording submission to Sheets...";
+
+                const response = await fetch(CONFIG.GOOGLE_SHEET_API_URL, {
+                    method: "POST",
+                    mode: "cors",
+                    headers: {
+                        "Content-Type": "text/plain;charset=utf-8"
+                    },
+                    body: JSON.stringify(dataObj)
+                });
+
+                feedback.className = "form-feedback mt-3 alert alert-success";
+                feedback.innerText = "Success! Your submission has been securely recorded.";
+                form.reset();
+
+            } catch (err) {
+                console.error(err);
+                feedback.className = "form-feedback mt-3 alert alert-danger";
+                feedback.innerText = "Error: " + err.message + ". Please verify configuration URLs.";
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = originalBtnText;
+            }
+        });
+    });
+});
