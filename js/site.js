@@ -87,7 +87,20 @@ document.addEventListener("DOMContentLoaded", () => {
 
             // Slideshow setup
             const slides = document.querySelectorAll(".popup-slide");
+            const projects = [
+                "projects/neelkanth-nagar.html",
+                "projects/riyasat-bliss.html",
+                "projects/aerocrystal.html",
+                "projects/happy-aerocity-1.html",
+                "projects/happy-aerocity.html",
+                "projects/heritage.html",
+                "projects/the-riyasat-sankalp.html",
+                "projects/riyasat-royelcrest.html",
+                "projects/riyasat-montera.html"
+            ];
+
             let activeIndex = 0;
+
             if (slides.length > 1) {
                 setInterval(() => {
                     slides[activeIndex].classList.remove("active");
@@ -107,8 +120,9 @@ document.addEventListener("DOMContentLoaded", () => {
             // One-click redirect on the entire popup (excluding close button)
             popupContent.addEventListener("click", (e) => {
                 if (e.target.id === "adPopupClose") return;
-                // Redirect to the featured project in advertisement
-                window.location.href = "projects/neelkanth-nagar.html";
+
+                // Open the page of the currently visible project
+                window.location.href = projects[activeIndex];
             });
         }
 
@@ -127,7 +141,9 @@ document.addEventListener("DOMContentLoaded", () => {
     forms.forEach(form => {
         form.addEventListener("submit", async (e) => {
             e.preventDefault();
-            
+            console.log("Submitting form...");
+            console.log(url);
+            console.log(formData);
             const submitBtn = form.querySelector('button[type="submit"]');
             const originalBtnText = submitBtn.innerHTML;
             
@@ -205,5 +221,66 @@ document.addEventListener("DOMContentLoaded", () => {
                 submitBtn.innerHTML = originalBtnText;
             }
         });
+    });
+});
+document.querySelectorAll(".sheet-form").forEach(form => {
+    form.addEventListener("submit", async function (e) {
+
+        e.preventDefault();
+
+        // Decide which backend route to use
+        const url = window.location.pathname.includes("career")
+            ? "http://localhost:5000/api/career"
+            : "http://localhost:5000/api/inquiry";
+
+        const formData = {
+            name: form.querySelector('[name="name"]').value,
+            phone: form.querySelector('[name="phone"]').value,
+            email: form.querySelector('[name="email"]').value,
+
+            message: form.querySelector('[name="message"]')
+                ? form.querySelector('[name="message"]').value
+                : "",
+
+            address: form.querySelector('[name="address"]')
+                ? form.querySelector('[name="address"]').value
+                : "",
+
+            qualification: form.querySelector('[name="qualification"]')
+                ? form.querySelector('[name="qualification"]').value
+                : "",
+
+            experience: form.querySelector('[name="experience"]')
+                ? form.querySelector('[name="experience"]').value
+                : "",
+
+            appliedPosition: form.querySelector('[name="appliedPosition"]')
+                ? form.querySelector('[name="appliedPosition"]').value
+                : "",
+
+            coverLetter: form.querySelector('[name="coverLetter"]')
+                ? form.querySelector('[name="coverLetter"]').value
+                : ""
+        };
+
+        try {
+
+            const response = await fetch(url, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(formData)
+            });
+
+            const result = await response.json();
+
+            console.log(result);
+            alert(JSON.stringify(result));
+        } catch (err) {
+            console.error(err);
+            alert("Server error.");
+        }
+
     });
 });

@@ -96,7 +96,7 @@
                         <h3 class="text-uppercase mb-4">Apply Online</h3>
                         <p class="text-muted small mb-4">Join our league of property experts. Fill out the application form and attach your latest resume.</p>
                         
-                        <form class="sheet-form">
+                        <form id="careerForm" class="sheet-form">
                             <!-- Identifies the destination Sheet name in Apps Script -->
                             <input type="hidden" name="formType" value="Career Applications" />
                             <div class="mb-3">
@@ -136,13 +136,13 @@
                                     <option value="Digital Marketer">Digital Marketer</option>
                                 </select>
                             </div>
-                            <div class="mb-3">
+                            <!-- <div class="mb-3">
                                 <label class="form-label small text-muted">Upload Resume (PDF format preferred)</label>
                                 <input type="file" name="resumeFile" class="form-control rounded-0" accept=".pdf,.doc,.docx" required />
-                            </div>
-                            <div class="mb-4">
+                            </div> -->
+                            <!-- <div class="mb-4">
                                 <textarea name="coverLetter" rows="3" class="form-control rounded-0" placeholder="Tell us briefly why you want to join Raj Real Estate..."></textarea>
-                            </div>
+                            </div> -->
                             <button type="submit" class="btn btn-luxury w-100 py-3 text-uppercase">Submit Application</button>
                         </form>
                     </div>

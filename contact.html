@@ -96,8 +96,7 @@
                 <div class="col-lg-7">
                     <div class="p-5 bg-light border shadow-sm">
                         <h3 class="text-uppercase mb-4">Send Us a Direct Message</h3>
-                        
-                        <form class="sheet-form">
+                        <form id="inquiryForm" class="sheet-form"></form>
                             <input type="hidden" name="formType" value="Contact Us" />
                             <div class="row g-3">
                                 <div class="col-12">
@@ -112,8 +111,20 @@
                                     <label class="form-label text-muted small">Email Address</label>
                                     <input type="email" name="email" class="form-control rounded-0 p-3" required />
                                 </div>
+
                                 <div class="col-12">
-                                    <button type="submit" class="btn btn-luxury w-100 py-3 text-uppercase">Send Message</button>
+                                    <label class="form-label text-muted small">Message</label>
+                                    <textarea
+                                        name="message"
+                                        class="form-control rounded-0 p-3"
+                                        rows="4"
+                                        placeholder="Write your inquiry"></textarea>
+                                </div>
+
+                                <div class="col-12">
+                                    <button type="submit" class="btn btn-luxury w-100 py-3 text-uppercase">
+                                        Send Message
+                                    </button>
                                 </div>
                             </div>
                         </form>
