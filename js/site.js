@@ -21,6 +21,67 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
+    // 1.5. MOBILE SIDEBAR DRAWER GENERATION & TOGGLING
+    const toggler = document.querySelector(".navbar-toggler");
+    if (navbar && toggler) {
+        // Create Sidebar Drawer elements dynamically to avoid editing all HTML files
+        const logoImg = navbar.querySelector(".navbar-brand img");
+        const logoSrc = logoImg ? logoImg.getAttribute("src") : "images/logo.png";
+        
+        // Build Drawer HTML
+        const drawer = document.createElement("div");
+        drawer.className = "mobile-sidebar-drawer";
+        drawer.innerHTML = `
+            <button class="mobile-sidebar-close" aria-label="Close menu">&times;</button>
+            <div class="mobile-sidebar-header">
+                <img src="${logoSrc}" alt="Raj Real Estate Logo">
+            </div>
+            <ul class="mobile-sidebar-nav"></ul>
+        `;
+        
+        const overlay = document.createElement("div");
+        overlay.className = "mobile-sidebar-overlay";
+        
+        document.body.appendChild(drawer);
+        document.body.appendChild(overlay);
+        
+        const sidebarNav = drawer.querySelector(".mobile-sidebar-nav");
+        const closeBtn = drawer.querySelector(".mobile-sidebar-close");
+        
+        // Clone links from navbar to mobile sidebar
+        const navLinks = navbar.querySelectorAll(".navbar-nav .nav-link");
+        navLinks.forEach(link => {
+            const li = document.createElement("li");
+            const clonedLink = link.cloneNode(true);
+            clonedLink.className = "nav-link" + (link.classList.contains("active") ? " active" : "");
+            li.appendChild(clonedLink);
+            sidebarNav.appendChild(li);
+        });
+        
+        // Toggle Sidebar Function
+        const toggleSidebar = (show) => {
+            if (show) {
+                drawer.classList.add("active");
+                overlay.classList.add("active");
+                document.body.style.overflow = "hidden";
+            } else {
+                drawer.classList.remove("active");
+                overlay.classList.remove("active");
+                document.body.style.overflow = "";
+            }
+        };
+        
+        // Listeners
+        toggler.addEventListener("click", (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            toggleSidebar(true);
+        });
+        
+        closeBtn.addEventListener("click", () => toggleSidebar(false));
+        overlay.addEventListener("click", () => toggleSidebar(false));
+    }
+
     // 2. COUNTER ANIMATION
     const counters = document.querySelectorAll(".counter-value");
     if (counters.length > 0) {
@@ -106,7 +167,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     slides[activeIndex].classList.remove("active");
                     activeIndex = (activeIndex + 1) % slides.length;
                     slides[activeIndex].classList.add("active");
-                }, 2500);
+                }, 2000);
             }
 
             // Close button 5s delay
