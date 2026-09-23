@@ -327,29 +327,47 @@
     </footer>
 
     <!-- Script for Dynamic Card Filtering -->
-    <script>
-        document.addEventListener("DOMContentLoaded", () => {
-            const filterButtons = document.querySelectorAll("#filterContainer button");
-            const projectCards = document.querySelectorAll(".project-card");
+ <!-- Script for Dynamic Card Filtering -->
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    const filterButtons = document.querySelectorAll("#filterContainer button");
+    const projectCards = document.querySelectorAll(".project-card");
 
-            filterButtons.forEach(button => {
-                button.addEventListener("click", () => {
-                    filterButtons.forEach(btn => btn.classList.remove("active", "bg-dark", "text-light"));
-                    button.classList.add("active", "bg-dark", "text-light");
-                    const filterValue = button.getAttribute("data-filter");
+    function applyFilter(filterValue) {
+      filterButtons.forEach(btn => btn.classList.remove("active", "bg-dark", "text-light"));
+      const activeBtn = document.querySelector(`#filterContainer button[data-filter="${filterValue}"]`);
+      if (activeBtn) activeBtn.classList.add("active", "bg-dark", "text-light");
 
-                    projectCards.forEach(card => {
-                        if (filterValue === "all" || card.getAttribute("data-city") === filterValue) {
-                            card.style.display = "block";
-                        } else {
-                            card.style.display = "none";
-                        }
-                    });
-                });
-            });
-        });
-    </script>
+      projectCards.forEach(card => {
+        if (filterValue === "all" || card.getAttribute("data-city") === filterValue) {
+          card.style.display = "block";
+        } else {
+          card.style.display = "none";
+        }
+      });
+    }
 
+    filterButtons.forEach(button => {
+      button.addEventListener("click", () => {
+        const filterValue = button.getAttribute("data-filter");
+        // Update URL without reloading the page
+        const newPath = filterValue === "all" ? "/projects.html" : `/projects/${filterValue}`;
+        history.pushState({}, "", newPath);
+        applyFilter(filterValue);
+      });
+    });
+
+    // On page load, check URL and apply matching filter automatically
+    const pathParts = window.location.pathname.split("/").filter(Boolean);
+    const cityFromUrl = pathParts[pathParts.length - 1];
+    const validCities = ["jaipur", "ajmer", "mumbai"];
+    if (validCities.includes(cityFromUrl)) {
+      applyFilter(cityFromUrl);
+    } else {
+      applyFilter("all");
+    }
+  });
+</script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="js/site.js"></script>
 </body>
