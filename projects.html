@@ -347,13 +347,12 @@
       });
     }
 
-    filterButtons.forEach(button => {
-      button.addEventListener("click", () => {
-        const filterValue = button.getAttribute("data-filter");
-        // Update URL without reloading the page
-        const newPath = filterValue === "all" ? "/projects.html" : `/projects/${filterValue}`;
-        history.pushState({}, "", newPath);
-        applyFilter(filterValue);
+   const newPath = filterValue === "all"
+    ? "/projects.html"
+    : `/projects/${filterValue}`;
+
+history.pushState({}, "", newPath);
+applyFilter(filterValue);
       });
     });
 
