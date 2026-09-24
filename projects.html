@@ -48,11 +48,11 @@
        
     <button type="button" class="btn btn-outline-dark rounded-0 px-4 py-2" data-filter="all">ALL CITIES</button>
 
-    <a href="projects/jaipur/" class="btn btn-outline-dark rounded-0 px-4 py-2">JAIPUR</a>
+<button type="button" class="btn btn-outline-dark rounded-0 px-4 py-2" data-filter="jaipur">JAIPUR</button>
 
-    <a href="projects/ajmer/" class="btn btn-outline-dark rounded-0 px-4 py-2">AJMER</a>
+<button type="button" class="btn btn-outline-dark rounded-0 px-4 py-2" data-filter="ajmer">AJMER</button>
 
-    <a href="projects/mumbai/" class="btn btn-outline-dark rounded-0 px-4 py-2">NAVI MUMBAI</a>
+<button type="button" class="btn btn-outline-dark rounded-0 px-4 py-2" data-filter="mumbai">NAVI MUMBAI</button>
 </div>
 
             <div class="row g-4" id="projectsGrid">
@@ -333,43 +333,103 @@
     <!-- Script for Dynamic Card Filtering -->
  <!-- Script for Dynamic Card Filtering -->
 <script>
-  document.addEventListener("DOMContentLoaded", () => {
-    const filterButtons = document.querySelectorAll("#filterContainer button");
+document.addEventListener("DOMContentLoaded", () => {
+
+    const filterButtons = document.querySelectorAll("#filterContainer [data-filter]");
     const projectCards = document.querySelectorAll(".project-card");
 
-    function applyFilter(filterValue) {
-      filterButtons.forEach(btn => btn.classList.remove("active", "bg-dark", "text-light"));
-      const activeBtn = document.querySelector(`#filterContainer button[data-filter="${filterValue}"]`);
-      if (activeBtn) activeBtn.classList.add("active", "bg-dark", "text-light");
+    const validCities = ["jaipur", "ajmer", "mumbai"];
 
-      projectCards.forEach(card => {
-        if (filterValue === "all" || card.getAttribute("data-city") === filterValue) {
-          card.style.display = "block";
-        } else {
-          card.style.display = "none";
+    function applyFilter(filterValue, updateUrl = true) {
+
+        // Update active button
+        filterButtons.forEach(btn => {
+            btn.classList.remove("active", "bg-dark", "text-light");
+        });
+
+        const activeBtn = document.querySelector(
+            `#filterContainer [data-filter="${filterValue}"]`
+        );
+
+        if (activeBtn) {
+            activeBtn.classList.add("active", "bg-dark", "text-light");
         }
-      });
+
+        // Show / hide projects
+        projectCards.forEach(card => {
+
+            if (
+                filterValue === "all" ||
+                card.getAttribute("data-city") === filterValue
+            ) {
+                card.style.display = "block";
+            } else {
+                card.style.display = "none";
+            }
+
+        });
+
+        // Update browser URL
+        if (updateUrl) {
+
+            const newPath =
+                filterValue === "all"
+                    ? "/projects.html"
+                    : `/projects/${filterValue}`;
+
+            history.pushState(
+                { city: filterValue },
+                "",
+                newPath
+            );
+        }
     }
 
-   const newPath = filterValue === "all"
-    ? "/projects.html"
-    : `/projects/${filterValue}`;
 
-history.pushState({}, "", newPath);
-applyFilter(filterValue);
-      });
+    // City button clicks
+    filterButtons.forEach(button => {
+
+        button.addEventListener("click", () => {
+
+            const filterValue = button.getAttribute("data-filter");
+
+            applyFilter(filterValue, true);
+
+        });
+
     });
 
-    // On page load, check URL and apply matching filter automatically
-    const pathParts = window.location.pathname.split("/").filter(Boolean);
-    const cityFromUrl = pathParts[pathParts.length - 1];
-    const validCities = ["jaipur", "ajmer", "mumbai"];
-    if (validCities.includes(cityFromUrl)) {
-      applyFilter(cityFromUrl);
-    } else {
-      applyFilter("all");
+
+    // Handle browser Back / Forward
+    window.addEventListener("popstate", () => {
+
+        const pathParts =
+            window.location.pathname.split("/").filter(Boolean);
+
+        let city = pathParts[pathParts.length - 1];
+
+        if (!validCities.includes(city)) {
+            city = "all";
+        }
+
+        applyFilter(city, false);
+
+    });
+
+
+    // Apply filter when page first loads
+    const pathParts =
+        window.location.pathname.split("/").filter(Boolean);
+
+    let initialCity = pathParts[pathParts.length - 1];
+
+    if (!validCities.includes(initialCity)) {
+        initialCity = "all";
     }
-  });
+
+    applyFilter(initialCity, false);
+
+});
 </script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="js/site.js"></script>
